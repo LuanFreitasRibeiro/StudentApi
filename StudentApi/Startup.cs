@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -9,6 +10,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using StudentApi.Context;
+using StudentApi.Models;
+using StudentApi.Models.Request;
+using StudentApi.Models.Response;
 using StudentApi.Services;
 using StudentApi.Services.Interfaces;
 using System;
@@ -40,6 +44,17 @@ namespace StudentApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "StudentApi", Version = "v1" });
             });
+
+            var config = new MapperConfiguration(cfg => 
+            {
+                cfg.CreateMap<StudentRequest, Student>();
+                cfg.CreateMap<Student, StudentResponse>();
+                cfg.CreateMap<Student, StudentRequest>();
+            });
+            
+            IMapper mapper = config.CreateMapper();
+
+            services.AddSingleton(mapper);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
