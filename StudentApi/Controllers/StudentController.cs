@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StudentApi.Models;
+using StudentApi.Models.Request;
 using StudentApi.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -48,7 +50,7 @@ namespace StudentApi.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<ActionResult<Student>> GetStudent([FromRoute] int id)
+        public async Task<ActionResult<Student>> GetStudent([FromRoute] Guid id)
         {
             var student = await _studentService.GetStudentById(id);
 
@@ -59,27 +61,29 @@ namespace StudentApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateStudent([FromBody] Student request)
+        public async Task<IActionResult> CreateStudent([FromBody] StudentRequest request)
         {
-            await _studentService.CreateStudent(request); 
+            var response = await _studentService.CreateStudent(request); 
 
-            return Created(nameof(GetStudent), new { id = request.Id, request });
+            return Created(nameof(CreateStudent), response);
         }
 
         [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdateStudent([FromRoute] int id, [FromBody] Student request)
+        public async Task<IActionResult> UpdateStudent([FromRoute] Guid id, [FromBody] StudentRequest request)
         {
-            await _studentService.UpdateStudent(request);
-
+            await _studentService.UpdateStudent(id, request);
 
             return Ok();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStudent([FromRoute] int id)
+        public async Task<IActionResult> DeleteStudent([FromRoute] Guid id)
         {
+            var findStudent = _studentService.GetStudentById(id);
+            if(findStudent == null)
+                return NotFound();
+                
             await _studentService.DeleteStudent(id);
-
 
             return NoContent();
         }
